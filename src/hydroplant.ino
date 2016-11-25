@@ -12,7 +12,7 @@ dht11 DHT11;
 BufferFiller bfill;
 
 static byte mymac[] = {0xD0, 0x69, 0x69, 0x2D, 0x30, 0x31};
-byte Ethernet::buffer[1000];
+byte Ethernet::buffer[1500];
 
 const int dhtPin = 2;
 const int moisturePin = A0;
@@ -30,7 +30,13 @@ word homePage(int t, int h, int m, int l) {
     "<head>"
     "<meta http-equiv='refresh' content='5'/>"
     "<meta charset=\"utf-8\" />"
+    "<style>"
+    "body { background-color: #333333; text-align: center; color: #33b5d3; font-size: 22px; font-family: 'Gloria Hallelujah', cursive; }"
+    "p { display: inline; margin-left: 12px; }"
+    "div { margin: 20px; }"
+    "</style>"
     "<link href=\"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" rel=\"stylesheet\">"
+    "<link href=\"https://fonts.googleapis.com/css?family=Gloria+Hallelujah\" rel=\"stylesheet\">"
     "<title>HydroPlant</title>"
     "</head>"
     "<body>"

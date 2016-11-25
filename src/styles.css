@@ -1,0 +1,16 @@
+body {
+  background-color: #333333;
+  text-align: center;
+  color: #33b5d3;
+  font-size: 22px;
+  font-family: 'Gloria Hallelujah', cursive;
+}
+
+p {
+  display: inline;
+  margin-left: 12px;
+}
+
+div {
+  margin: 20px;
+}
