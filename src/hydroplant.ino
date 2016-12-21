@@ -1,4 +1,5 @@
-#include <dht11.h>
+// #include <dht11.h>
+#include "../lib/dht11/dht11.h"
 
 dht11 DHT11;
 
