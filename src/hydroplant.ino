@@ -1,17 +1,39 @@
-// #include <dht11.h>
 #include "../lib/dht11/dht11.h"
+#include "../lib/rgb_color/rgb_color.h"
+#include "../lib/fader/fader.h"
 
 dht11 DHT11;
 
 const int dhtPin = 2;
 const int moisturePin = A0;
 const int lightPin = A1;
+const int redPin = 6;
+const int greenPin = 5;
+const int bluePin = 3;
+const int pumpPin = 7;
 
-void setup(){
+rgb_color current( 0, 0,  0 );
+
+void setup() {
+
   Serial.begin(57600);
+
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+
+  pinMode(pumpPin, OUTPUT);
+
+  setColor(0, 0, 0);
 }
 
 void loop(){
+
+  fader f (redPin, greenPin, bluePin);
+
+  rgb_color red(255, 0, 0);
+  rgb_color blue(0, 0, 255);
+  rgb_color green(0, 255, 0);
 
   int moisture = analogRead(moisturePin);
 
@@ -35,6 +57,24 @@ void loop(){
 
   Serial.println();
 
+  if(t > 21) {
+    digitalWrite(pumpPin, HIGH);
+  } else {
+    digitalWrite(pumpPin, LOW);
+  }
+
+  if(moisture < 350) {
+    f.fade(current, green);
+    current = green;
+  } else if(moisture < 700) {
+    f.fade(current, blue);
+    current = blue;
+  } else {
+    f.fade(current, red);
+    current = red;
+  }
+
+
   delay(1000);
 }
 
@@ -54,4 +94,16 @@ int readMoisture() {
 
 int readLight() {
   return (int) analogRead(lightPin);
+}
+
+void setColor(int red, int green, int blue) {
+
+  //Using common anode
+  red = 255 - red;
+  green = 255 - green;
+  blue = 255 - blue;
+
+  analogWrite(redPin, red);
+  analogWrite(greenPin, green);
+  analogWrite(bluePin, blue);
 }
