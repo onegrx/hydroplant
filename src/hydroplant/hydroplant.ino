@@ -14,10 +14,9 @@ LiquidCrystal lcd(9, 8, A2, A3, A4, A5);
 const int dhtPin = 2;
 const int moisturePin = A0;
 const int lightPin = A1;
-const int simpleLedPin = nullptr;  // TODO
 const int maxMoisture = 900;
 const int minMoisture = 500;
-const int thresholdSunlight = nullptr; // TODO
+const int nightThresholdLight = nullptr; // TODO
 const int wateringUnit = 10000; //in seconds
 const int timeout = 500;
 const int wateringTimeout = 60000;
@@ -116,12 +115,12 @@ void loop() {
 }
 
 void waterPlant() {
-    digitalWrite(simpleLedPin, 1);
+    digitalWrite(pumpPin, 1);
     watering.isNow = true;
 }
 
 void putWaterAway() {
-    digitalWrite(simpleLedPin, 0);
+    digitalWrite(pumpPin, 0);
     watering.isNow = false;
 }
 
@@ -156,7 +155,7 @@ int readLight() {
 }
 
 void updateMeasurements() {
-    measure.night = readLight() < thresholdSunlight;
+    measure.night = readLight() < nightThresholdLight;
     measure.humidity = readHumidity();
     measure.temperature = readTemperature();
     measure.moisture = readMoisture();
