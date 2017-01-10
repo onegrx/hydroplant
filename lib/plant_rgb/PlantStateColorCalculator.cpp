@@ -5,6 +5,7 @@
 #include "PlantStateColorCalculator.h"
 #include "../rgb_color/rgb_color.h"
 #include <math.h>
+#include <assert.h>
 
 rgb_color PlantStateColorCalculator::calcPlantStateColor(int t, int h, int m) {
 
@@ -30,11 +31,15 @@ rgb_color PlantStateColorCalculator::calcPlantStateColor(int t, int h, int m) {
  * @return value mapped to [0, 1] interval where 0 is worst condition and 1 is optimal
  */
 double PlantStateColorCalculator::mapValueToNormalizedInterval(int max, int min, int current) {
+    assert(max > min);
+    assert(current >= min && current <= max);
     double optimalValue = (max + min) / 2;
     double badToOptimal = (max - min) / 2;
     double distFromOptimal = fabs(optimalValue - current);
 
-    return distFromOptimal >= badToOptimal ? 0 : (1 - distFromOptimal) / badToOptimal;
+    double result = distFromOptimal >= badToOptimal ? 0 : (1 - distFromOptimal) / badToOptimal;
+    assert(result <= 1.0 && result >= 0.0);
+    return result;
 }
 
 /**
@@ -45,13 +50,18 @@ double PlantStateColorCalculator::mapValueToNormalizedInterval(int max, int min,
  * @return all params average normalized on [0, 1] interval
  */
 double PlantStateColorCalculator::normalizeInputValues(double temperature, double humidity, double moisture) {
+    assert(temperature <= 1.0 && temperature >= 0.0);
+    assert(humidity <= 1.0 && humidity >= 0.0);
+    assert(moisture <= 1.0 && moisture >= 0.0);
     const int temperatureWeight = 2;
     const int humidityWeight = 2;
     const int moistureWeight = 6;
 
     // weighted mean
-    return (temperature * temperatureWeight + moisture * moistureWeight + humidity * humidityWeight)
+    double result = (temperature * temperatureWeight + moisture * moistureWeight + humidity * humidityWeight)
            / (temperatureWeight + moistureWeight + humidityWeight);
+    assert(result <= 1.0 && result >= 0.0);
+    return result;
 }
 
 int PlantStateColorCalculator::getBlue(double percent) {
@@ -60,6 +70,7 @@ int PlantStateColorCalculator::getBlue(double percent) {
 
 int PlantStateColorCalculator::getRed(double percent) {
     // mapping to [1, 20] fit function range
+    assert(percent <= 1.0 && percent >= 0.0);
     double percentInFitRange = percent * 19 + 1;
     double approximatedValueInFitRange = -0.000188196 * pow(percentInFitRange, 6)
                                          + 0.0117451 * pow(percentInFitRange, 5)
@@ -81,6 +92,7 @@ int PlantStateColorCalculator::getRed(double percent) {
  */
 int PlantStateColorCalculator::getGreen(double percent) {
     // mapping to [1, 20] fit function range
+    assert(percent <= 1.0 && percent >= 0.0);
     double percentInFitRange = percent * 19 + 1;
     double approximatedValueInFitRange = -0.00019766 * pow(percentInFitRange, 6)
                                          + 0.0122973 * pow(percentInFitRange, 5)
