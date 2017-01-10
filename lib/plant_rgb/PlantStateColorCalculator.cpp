@@ -4,7 +4,7 @@
 
 #include "PlantStateColorCalculator.h"
 #include "../rgb_color/rgb_color.h"
-#include <cmath>
+#include <math.h>
 
 rgb_color PlantStateColorCalculator::calcPlantStateColor(int t, int h, int m) {
 
@@ -32,7 +32,7 @@ rgb_color PlantStateColorCalculator::calcPlantStateColor(int t, int h, int m) {
 double PlantStateColorCalculator::mapValueToNormalizedInterval(int max, int min, int current) {
     double optimalValue = (max + min) / 2;
     double badToOptimal = (max - min) / 2;
-    double distFromOptimal = std::abs(optimalValue - current);
+    double distFromOptimal = fabs(optimalValue - current);
 
     return distFromOptimal >= badToOptimal ? 0 : (1 - distFromOptimal) / badToOptimal;
 }
@@ -61,17 +61,17 @@ int PlantStateColorCalculator::getBlue(double percent) {
 int PlantStateColorCalculator::getRed(double percent) {
     // mapping to [1, 20] fit function range
     double percentInFitRange = percent * 19 + 1;
-    double approximatedValueInFitRange = -0.000188196 * std::pow(percentInFitRange, 6)
-                                         + 0.0117451 * std::pow(percentInFitRange, 5)
-                                         - 0.269611 * std::pow(percentInFitRange, 4)
-                                         + 2.75132 * std::pow(percentInFitRange, 3)
-                                         - 12.8295 * std::pow(percentInFitRange, 2)
+    double approximatedValueInFitRange = -0.000188196 * pow(percentInFitRange, 6)
+                                         + 0.0117451 * pow(percentInFitRange, 5)
+                                         - 0.269611 * pow(percentInFitRange, 4)
+                                         + 2.75132 * pow(percentInFitRange, 3)
+                                         - 12.8295 * pow(percentInFitRange, 2)
                                          + 24.3844 * percentInFitRange
                                          + 230.282;
     // mapping to [0, 255] color range
     double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 256 / 19;
 
-    return (int) std::round(approximatedValueInColorRange);
+    return (int) round(approximatedValueInColorRange);
 }
 
 /**
@@ -82,15 +82,15 @@ int PlantStateColorCalculator::getRed(double percent) {
 int PlantStateColorCalculator::getGreen(double percent) {
     // mapping to [1, 20] fit function range
     double percentInFitRange = percent * 19 + 1;
-    double approximatedValueInFitRange = -0.00019766 * std::pow(percentInFitRange, 6)
-                                         + 0.0122973 * std::pow(percentInFitRange, 5)
-                                         - 0.281866 * std::pow(percentInFitRange, 4)
-                                         + 2.88042 * std::pow(percentInFitRange, 3)
-                                         - 13.5398 * std::pow(percentInFitRange, 2)
+    double approximatedValueInFitRange = -0.00019766 * pow(percentInFitRange, 6)
+                                         + 0.0122973 * pow(percentInFitRange, 5)
+                                         - 0.281866 * pow(percentInFitRange, 4)
+                                         + 2.88042 * pow(percentInFitRange, 3)
+                                         - 13.5398 * pow(percentInFitRange, 2)
                                          + 51.8622 * percentInFitRange
                                          - 33.6111;
     // mapping to [0, 255] color range
     double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 256 / 19;
 
-    return (int) std::round(approximatedValueInColorRange);
+    return (int) round(approximatedValueInColorRange);
 }

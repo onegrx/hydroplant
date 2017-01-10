@@ -1,11 +1,11 @@
-#include "../../lib/dht11/dht11.h"
-#include "../../lib/rgb_color/rgb_color.h"
-#include "../../lib/fader/fader.h"
+#include "../lib/dht11/dht11.h"
+#include "../lib/rgb_color/rgb_color.h"
+#include "../lib/fader/fader.h"
 #include <Wire.h>
 #include <LiquidCrystal.h>
 #include <dht11.h>
 #include <time.h>
-#include "../../lib/plant_rgb/PlantStateColorCalculator.h"
+#include "../lib/plant_rgb/PlantStateColorCalculator.h"
 
 dht11 DHT11;
 LiquidCrystal lcd(9, 8, A2, A3, A4, A5);
@@ -16,7 +16,7 @@ const int moisturePin = A0;
 const int lightPin = A1;
 const int maxMoisture = 900;
 const int minMoisture = 500;
-const int nightThresholdLight = nullptr; // TODO
+const int nightThresholdLight = 0; // TODO
 const int wateringUnit = 10000; //in seconds
 const int timeout = 500;
 const int wateringTimeout = 60000;
