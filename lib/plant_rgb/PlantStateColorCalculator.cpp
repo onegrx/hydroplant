@@ -23,7 +23,6 @@ rgb_color PlantStateColorCalculator::calcPlantStateColor(int t, int h, int m) {
 
 //private
 
-
 void assert(int line, bool check) {
   Serial.print(line);
   Serial.println(check);
