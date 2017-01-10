@@ -58,13 +58,13 @@ double PlantStateColorCalculator::normalizeInputValues(double temperature, doubl
     assert(58, temperature <= 1.0 && temperature >= 0.0);
     assert(59, humidity <= 1.0 && humidity >= 0.0);
     assert(60, moisture <= 1.0 && moisture >= 0.0);
-    const int temperatureWeight = 2;
-    const int humidityWeight = 2;
-    const int moistureWeight = 6;
+    const double temperatureWeight = 0.2;
+    const double humidityWeight = 0.2;
+    const double moistureWeight = 0.6;
 
     // weighted mean
     double result = (temperature * temperatureWeight + moisture * moistureWeight + humidity * humidityWeight)
-           / (temperatureWeight + moistureWeight + humidityWeight);
+           / 1;
     assert(68, result <= 1.0 && result >= 0.0);
     return result;
 }
