@@ -82,7 +82,9 @@ int PlantStateColorCalculator::getRed(double percent) {
     // mapping to [0, 255] color range
     double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 256 / 19;
 
-    return (int) round(approximatedValueInColorRange);
+    int result = (int) round(approximatedValueInColorRange);
+    assert(result <= 255 && result >= 0);
+    return result;
 }
 
 /**
@@ -103,6 +105,7 @@ int PlantStateColorCalculator::getGreen(double percent) {
                                          - 33.6111;
     // mapping to [0, 255] color range
     double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 256 / 19;
-
-    return (int) round(approximatedValueInColorRange);
+    int result = (int) round(approximatedValueInColorRange);
+    assert(result <= 255 && result >= 0);
+    return result;
 }
