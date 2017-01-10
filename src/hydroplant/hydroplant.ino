@@ -5,102 +5,124 @@
 #include <LiquidCrystal.h>
 #include <dht11.h>
 #include <time.h>
+#include "../../lib/plant_rgb/PlantStateColorCalculator.h"
 
 dht11 DHT11;
 LiquidCrystal lcd(9, 8, A2, A3, A4, A5);
 
+// constants
 const int dhtPin = 2;
 const int moisturePin = A0;
 const int lightPin = A1;
-const int thresholdMoisture = 900;
+const int simpleLedPin = nullptr;  // TODO
+const int maxMoisture = 900;
 const int minMoisture = 500;
-const int timeout = 1000;           //todo change to an hour
-const int wateringTimeout = 100;    //todo change to a minute
-
-
-char *getCurrentTime();
-
-void waterOneUnit();
-
-int readMoisture() ;
+const int thresholdSunlight = nullptr; // TODO
+const int wateringUnit = 10000; //in seconds
+const int timeout = 500;
+const int wateringTimeout = 60000;
 const int redPin = 6;
 const int greenPin = 5;
 const int bluePin = 3;
 const int pumpPin = 7;
 
-rgb_color current(0, 0, 0);
+rgb_color currentColor(0, 0, 0);
 
+// structures
+struct Watering {
+    bool waterTime = false;
+    unsigned int start;
+    bool isNow = false;
+} watering;
+
+struct Measure {
+    int temperature;
+    int humidity;
+    int moisture;
+    int night;
+    unsigned int time;
+} measure;
+
+// functions
+unsigned int getCurrentTime();
+
+void waterPlant();
+
+void putWaterAway();
+
+int readMoisture();
+
+void setColor(int red, int green, int blue);
+
+void printToLcd(Measure measurements);
+
+int readLight();
+
+void updateMeasurements();
+
+bool hasTimePassed(int startTime, int interval);
 
 void setup() {
 
-  lcd.begin(16, 2);
-  lcd.print("*  Hydroplant  *");
-  delay(1000);
-  lcd.print("");
+    lcd.begin(16, 2);
+    lcd.print("*  Hydroplant  *");
+    delay(1000);
+    lcd.print("");
 
-  Serial.begin(57600);
+    Serial.begin(57600);
 
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
+    pinMode(redPin, OUTPUT);
+    pinMode(greenPin, OUTPUT);
+    pinMode(bluePin, OUTPUT);
 
-  pinMode(pumpPin, OUTPUT);
+    pinMode(pumpPin, OUTPUT);
 
-  setColor(0, 0, 0);
+    setColor(0, 0, 0);
 }
 
 void loop() {
 
-  //Initialize colors
-  fader f (redPin, greenPin, bluePin);
-  rgb_color red(255, 0, 0);
-  rgb_color blue(0, 0, 255);
-  rgb_color green(0, 255, 0);
+    // plant measurement part
+    updateMeasurements();
 
-  int moisture = analogRead(moisturePin);
+    printToLcd(measure);
 
-    int currentMoisture = readMoisture();
-    Serial.print("current moisture: ");
-    Serial.println(currentMoisture);
+    PlantStateColorCalculator calculator;
+    rgb_color newColor = calculator.calcPlantStateColor(measure.temperature, measure.humidity, measure.moisture);
+    fader f(redPin, greenPin, bluePin);
+    f.fade(currentColor, newColor);
+    currentColor = newColor;
 
-    if (currentMoisture > thresholdMoisture) {
-        Serial.println("i'm inside if");
+    // watering related part
 
-        do {
-            Serial.print("water time: ");
-            Serial.println(millis());
-
-            waterOneUnit();
-
-            delay(wateringTimeout);
-            currentMoisture = readMoisture();
-
-        } while (currentMoisture > minMoisture);
+    if (measure.moisture > maxMoisture) {
+        watering.waterTime = true;
+        watering.start = getCurrentTime();
     }
-  Serial.println();
+    if (watering.isNow && hasTimePassed(watering.start, wateringUnit)) {
+        putWaterAway();
+    }
+    if (watering.waterTime && hasTimePassed(watering.start, wateringTimeout)) {
+        watering.start = getCurrentTime();
+        if (!measure.night) {
+            waterPlant();
+        }
+        if (measure.moisture < minMoisture) {
+            watering.waterTime = false;
+        }
+    }
 
-  printToLcd(t, h, moisture, light);
+    delay(timeout);
+}
 
+void waterPlant() {
+    digitalWrite(simpleLedPin, 1);
+    watering.isNow = true;
+}
 
-  if(t > 21) {
-    digitalWrite(pumpPin, HIGH);
-  } else {
-    digitalWrite(pumpPin, LOW);
-  }
-
-  if(moisture < 350) {
-    f.fade(current, green);
-    current = green;
-  } else if(moisture < 700) {
-    f.fade(current, blue);
-    current = blue;
-  } else {
-    f.fade(current, red);
-    current = red;
-  }
-
-
-  delay(1000);
+void putWaterAway() {
+    digitalWrite(simpleLedPin, 0);
+    watering.isNow = false;
 }
 
 int readTemperature() {
@@ -125,30 +147,49 @@ int readMoisture() {
 //    return moistureSamplesSum / numberOfMoistureSamples;
 }
 
+unsigned int getCurrentTime() {
+    return millis();
+}
+
 int readLight() {
     return (int) analogRead(lightPin);
 }
 
-void setColor(int red, int green, int blue) {
-  //Using common anode
-  red = 255 - red;
-  green = 255 - green;
-  blue = 255 - blue;
-
-  analogWrite(redPin, red);
-  analogWrite(greenPin, green);
-  analogWrite(bluePin, blue);
+void updateMeasurements() {
+    measure.night = readLight() < thresholdSunlight;
+    measure.humidity = readHumidity();
+    measure.temperature = readTemperature();
+    measure.moisture = readMoisture();
+    measure.time = getCurrentTime();
 }
 
-void printToLcd(int t, int h, int m, int l) {
-  lcd.setCursor(0,0);
-  lcd.print("T: ");
-  lcd.print(t);
-  lcd.print("  M: ");
-  lcd.print(m);
-  lcd.setCursor(0,1);
-  lcd.print("H: ");
-  lcd.print(h);
-  lcd.print("  L: ");
-  lcd.print(l);
+bool hasTimePassed(int startTime, int interval) {
+    return (getCurrentTime() - startTime) >= interval;
+}
+
+
+void setColor(int red, int green, int blue) {
+    //Using common anode
+    red = 255 - red;
+    green = 255 - green;
+    blue = 255 - blue;
+
+    analogWrite(redPin, red);
+    analogWrite(greenPin, green);
+    analogWrite(bluePin, blue);
+}
+
+void printToLcd(Measure measurements) {
+    lcd.setCursor(0, 0);
+    lcd.print("Time: ");
+    lcd.print(measurements.time);
+    lcd.print("Temperature: ");
+    lcd.print(measurements.temperature);
+    lcd.print("Moisture: ");
+    lcd.print(measurements.moisture);
+    lcd.setCursor(0, 1);
+    lcd.print("Humidity: ");
+    lcd.print(measurements.humidity);
+    lcd.print("Night: ");
+    lcd.print(measurements.night);
 }
