@@ -41,7 +41,7 @@ double PlantStateColorCalculator::mapValueToNormalizedInterval(int max, int min,
     double optimalValue = (max + min) / 2;
     double badToOptimal = (max - min) / 2;
     double distFromOptimal = fabs(optimalValue - current);
-    Serial.println(optimalValue);Serial.println(badToOptimal);Serial.println(distFromOptimal);
+    // Serial.println(optimalValue);Serial.println(badToOptimal);Serial.println(distFromOptimal);
     double result = distFromOptimal >= badToOptimal ? 0 : (1 - (distFromOptimal / badToOptimal));
     assert(46, result <= 1.0 && result >= 0.0);
     return result;
@@ -85,7 +85,7 @@ int PlantStateColorCalculator::getRed(double percent) {
                                          + 24.3844 * percentInFitRange
                                          + 230.282;
     // mapping to [0, 255] color range
-    double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 256 / 19;
+    double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 255 / 19;
 
     int result = (int) round(approximatedValueInColorRange);
     assert(91, result <= 255 && result >= 0);
@@ -110,7 +110,7 @@ int PlantStateColorCalculator::getGreen(double percent) {
                                          + 51.8622 * percentInFitRange
                                          - 33.6111;
     // mapping to [0, 255] color range
-    double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 256 / 19;
+    double approximatedValueInColorRange = (approximatedValueInFitRange - 1) * 255 / 19;
     int result = (int) round(approximatedValueInColorRange);
     assert(115, result <= 255 && result >= 0);
     return result;
